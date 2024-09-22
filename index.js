@@ -18,13 +18,42 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+const isDateValid = (date) => {
+  return date instanceof Date && !isNaN(date);
+}
 
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
+app.get('/api/:date?', (req, res) => {
+  const { date=null } = req.params;
 
+  if(!date) {
+    const parsedDate = new Date();
+    res.json({
+      unix : parsedDate.getTime(),
+      utc : parsedDate.toUTCString()
+    }); 
+  }
+
+  let parsedDate = new Date(date);
+
+  if(parsedDate == 'Invalid Date'){
+    parsedDate = new Date(Number(date));
+  }
+
+  if(!isDateValid(parsedDate)){
+    res.json({ error : "Invalid Date" });
+    return;
+  }
+  
+  res.json({
+    unix : parsedDate.getTime(),
+    utc : parsedDate.toUTCString()
+  }); 
+});
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
